@@ -9,3 +9,7 @@ declare namespace PIXI {
     export interface Container extends Enchance { }
     export interface Graphics extends Enchance { }
 }
+
+declare module '@amoy/physify' {
+    export default function physify(options: any): void
+}
