@@ -1,16 +1,31 @@
 import { Ticker } from 'pixi.js'
-import { World, Bodies, Engine } from 'matter-js'
+import { World, Bodies, Engine, Render } from 'matter-js'
 
 export * from 'matter-js'
 
 export default function physify(options: any = {}) {
-    const { gravity = { x: 0, y: .98 } } = options
+    const {
+        gravity = { x: 0, y: .98 },
+        renderer = false,
+    } = options
     const things: any[] = []
     const engine = Engine.create()
 
     engine.world.gravity = Object.assign(engine.world.gravity, gravity)
 
     Engine.run(engine)
+
+    if (renderer) {
+        Render.run(Render.create({
+            element: document.body,
+            engine,
+            options: {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                showAngleIndicator: true,
+            },
+        }))
+    }
 
     Ticker.shared.add(() => {
         things.map(({ body, sprite }) => {

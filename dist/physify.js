@@ -10398,14 +10398,26 @@
     var matter_1 = matter.Engine;
     var matter_2 = matter.Bodies;
     var matter_3 = matter.World;
+    var matter_4 = matter.Render;
 
     function physify(options) {
         if (options === void 0) { options = {}; }
-        var _a = options.gravity, gravity = _a === void 0 ? { x: 0, y: .98 } : _a;
+        var _a = options.gravity, gravity = _a === void 0 ? { x: 0, y: .98 } : _a, _b = options.renderer, renderer = _b === void 0 ? false : _b;
         var things = [];
         var engine = matter_1.create();
         engine.world.gravity = Object.assign(engine.world.gravity, gravity);
         matter_1.run(engine);
+        if (renderer) {
+            matter_4.run(matter_4.create({
+                element: document.body,
+                engine: engine,
+                options: {
+                    width: window.innerWidth,
+                    height: window.innerHeight,
+                    showAngleIndicator: true,
+                },
+            }));
+        }
         pixi_js.Ticker.shared.add(function () {
             things.map(function (_a) {
                 var body = _a.body, sprite = _a.sprite;
@@ -10464,6 +10476,7 @@
 
     exports.Bodies = matter_2;
     exports.Engine = matter_1;
+    exports.Render = matter_4;
     exports.World = matter_3;
     exports.__moduleExports = matter;
     exports.default = physify;
