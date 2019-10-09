@@ -10396,11 +10396,11 @@ var matter_2 = matter.Bodies;
 var matter_3 = matter.World;
 var matter_4 = matter.Render;
 
+var things = [];
+var engine = matter_1.create();
 function physify(options) {
     if (options === void 0) { options = {}; }
     var _a = options.gravity, gravity = _a === void 0 ? { x: 0, y: .98 } : _a, _b = options.renderer, renderer = _b === void 0 ? false : _b;
-    var things = [];
-    var engine = matter_1.create();
     engine.world.gravity = Object.assign(engine.world.gravity, gravity);
     matter_1.run(engine);
     if (renderer) {
@@ -10420,14 +10420,8 @@ function physify(options) {
             if (body.render.visible) {
                 var _b = body.position, x = _b.x, y = _b.y, angle = body.angle;
                 sprite.rotation = angle;
-                if (sprite.anchor) {
-                    sprite.x = x;
-                    sprite.y = y;
-                }
-                else {
-                    sprite.x = x - sprite.width / 2;
-                    sprite.y = y - sprite.height / 2;
-                }
+                sprite.x = x;
+                sprite.y = y;
             }
         });
     });
@@ -10440,13 +10434,13 @@ function physify(options) {
                 if (options === void 0) { options = {}; }
                 if ([Sprite, Text].includes(component)) {
                     this.anchor.set(.5);
-                    this.x += this.width / 2;
-                    this.y += this.height / 2;
                 }
                 if ([Graphics].includes(component)) {
-                    this.x += this.width / 2;
-                    this.y += this.height / 2;
+                    this.pivot.x = this.width / 2;
+                    this.pivot.y = this.height / 2;
                 }
+                this.x += this.width / 2;
+                this.y += this.height / 2;
                 var _a = options.shape, shape = _a === void 0 ? 'rect' : _a, rest = __rest(options, ["shape"]);
                 var createBody = function (shape) {
                     if (shape === 'circle') {
@@ -10471,5 +10465,5 @@ function physify(options) {
 }
 
 export default physify;
-export { matter_2 as Bodies, matter_1 as Engine, matter_4 as Render, matter_3 as World, matter as __moduleExports };
+export { matter_2 as Bodies, matter_1 as Engine, matter_4 as Render, matter_3 as World, matter as __moduleExports, engine, things };
 //# sourceMappingURL=physify.es.js.map

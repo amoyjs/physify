@@ -2,14 +2,14 @@ import { Ticker } from 'pixi.js'
 import { World, Bodies, Engine, Render } from 'matter-js'
 
 export * from 'matter-js'
+export const things: any[] = []
+export const engine = Engine.create()
 
 export default function physify(options: any = {}) {
     const {
         gravity = { x: 0, y: .98 },
         renderer = false,
     } = options
-    const things: any[] = []
-    const engine = Engine.create()
 
     engine.world.gravity = Object.assign(engine.world.gravity, gravity)
 
@@ -33,14 +33,8 @@ export default function physify(options: any = {}) {
                 const { position: { x, y }, angle } = body
 
                 sprite.rotation = angle
-
-                if (sprite.anchor) {
-                    sprite.x = x
-                    sprite.y = y
-                } else {
-                    sprite.x = x - sprite.width / 2
-                    sprite.y = y - sprite.height / 2
-                }
+                sprite.x = x
+                sprite.y = y
             }
         })
     })
@@ -51,13 +45,13 @@ export default function physify(options: any = {}) {
             component.prototype.physify = function physify(options: any = {}) {
                 if ([Sprite, Text].includes(component)) {
                     this.anchor.set(.5)
-                    this.x += this.width / 2
-                    this.y += this.height / 2
                 }
                 if ([Graphics].includes(component)) {
-                    this.x += this.width / 2
-                    this.y += this.height / 2
+                    this.pivot.x = this.width / 2
+                    this.pivot.y = this.height / 2
                 }
+                this.x += this.width / 2
+                this.y += this.height / 2
                 const { shape = 'rect', ...rest } = options
                 const createBody = (shape: 'circle' | 'rect') => {
                     if (shape === 'circle') {
