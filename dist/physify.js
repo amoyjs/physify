@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('pixi.js')) :
-    typeof define === 'function' && define.amd ? define(['pixi.js'], factory) :
-    (global = global || self, global.physify = factory(global.PIXI));
-}(this, function (pixi_js) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('pixi.js')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'pixi.js'], factory) :
+    (global = global || self, factory(global.physify = {}, global.PIXI));
+}(this, function (exports, pixi_js) { 'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -10404,14 +10404,32 @@
         var _a = options.gravity, gravity = _a === void 0 ? { x: 0, y: .98 } : _a;
         var things = [];
         var engine = matter_1.create();
-        engine.world.gravity = gravity;
+        engine.world.gravity = Object.assign(engine.world.gravity, gravity);
         matter_1.run(engine);
+        pixi_js.Ticker.shared.add(function () {
+            things.map(function (_a) {
+                var body = _a.body, sprite = _a.sprite;
+                if (body.render.visible) {
+                    var _b = body.position, x = _b.x, y = _b.y, angle = body.angle;
+                    sprite.rotation = angle;
+                    if (sprite.anchor) {
+                        sprite.x = x;
+                        sprite.y = y;
+                    }
+                    else {
+                        sprite.x = x - sprite.width / 2;
+                        sprite.y = y - sprite.height / 2;
+                    }
+                }
+            });
+        });
         return function (_a) {
             var Sprite = _a.Sprite, Text = _a.Text, Graphics = _a.Graphics, Container = _a.Container;
             var components = [Sprite, Text, Graphics, Container];
             components.map(function (component) {
                 component.prototype.physify = function physify(options) {
                     var _this = this;
+                    if (options === void 0) { options = {}; }
                     if ([Sprite, Text].includes(component)) {
                         this.anchor.set(.5);
                         this.x += this.width / 2;
@@ -10441,27 +10459,16 @@
                     return body;
                 };
             });
-            pixi_js.Ticker.shared.add(function () {
-                things.map(function (_a) {
-                    var body = _a.body, sprite = _a.sprite;
-                    if (body.render.visible) {
-                        var _b = body.position, x = _b.x, y = _b.y, angle = body.angle;
-                        sprite.rotation = angle;
-                        if (!sprite.anchor) {
-                            sprite.x = x - sprite.width / 2;
-                            sprite.y = y - sprite.height / 2;
-                        }
-                        else {
-                            sprite.x = x;
-                            sprite.y = y;
-                        }
-                    }
-                });
-            });
         };
     }
 
-    return physify;
+    exports.Bodies = matter_2;
+    exports.Engine = matter_1;
+    exports.World = matter_3;
+    exports.__moduleExports = matter;
+    exports.default = physify;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 }));
 //# sourceMappingURL=physify.js.map

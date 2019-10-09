@@ -10400,14 +10400,32 @@ function physify(options) {
     var _a = options.gravity, gravity = _a === void 0 ? { x: 0, y: .98 } : _a;
     var things = [];
     var engine = matter_1.create();
-    engine.world.gravity = gravity;
+    engine.world.gravity = Object.assign(engine.world.gravity, gravity);
     matter_1.run(engine);
+    Ticker.shared.add(function () {
+        things.map(function (_a) {
+            var body = _a.body, sprite = _a.sprite;
+            if (body.render.visible) {
+                var _b = body.position, x = _b.x, y = _b.y, angle = body.angle;
+                sprite.rotation = angle;
+                if (sprite.anchor) {
+                    sprite.x = x;
+                    sprite.y = y;
+                }
+                else {
+                    sprite.x = x - sprite.width / 2;
+                    sprite.y = y - sprite.height / 2;
+                }
+            }
+        });
+    });
     return function (_a) {
         var Sprite = _a.Sprite, Text = _a.Text, Graphics = _a.Graphics, Container = _a.Container;
         var components = [Sprite, Text, Graphics, Container];
         components.map(function (component) {
             component.prototype.physify = function physify(options) {
                 var _this = this;
+                if (options === void 0) { options = {}; }
                 if ([Sprite, Text].includes(component)) {
                     this.anchor.set(.5);
                     this.x += this.width / 2;
@@ -10437,25 +10455,9 @@ function physify(options) {
                 return body;
             };
         });
-        Ticker.shared.add(function () {
-            things.map(function (_a) {
-                var body = _a.body, sprite = _a.sprite;
-                if (body.render.visible) {
-                    var _b = body.position, x = _b.x, y = _b.y, angle = body.angle;
-                    sprite.rotation = angle;
-                    if (!sprite.anchor) {
-                        sprite.x = x - sprite.width / 2;
-                        sprite.y = y - sprite.height / 2;
-                    }
-                    else {
-                        sprite.x = x;
-                        sprite.y = y;
-                    }
-                }
-            });
-        });
     };
 }
 
 export default physify;
+export { matter_2 as Bodies, matter_1 as Engine, matter_3 as World, matter as __moduleExports };
 //# sourceMappingURL=physify.es.js.map

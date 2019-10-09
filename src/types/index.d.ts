@@ -2,7 +2,7 @@ declare module 'matter-js'
 
 declare namespace PIXI {
     export interface Enchance {
-        physify(options: any): void
+        physify(options?: any): void
     }
     export interface Sprite extends Enchance { }
     export interface Text extends Enchance { }
