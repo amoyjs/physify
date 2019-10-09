@@ -11,5 +11,5 @@ declare namespace PIXI {
 }
 
 declare module '@amoy/physify' {
-    export default function physify(options: any): void
+    export default function physify(options?: any): (options: any) => any
 }

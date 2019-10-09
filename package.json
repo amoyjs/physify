@@ -1,7 +1,7 @@
 {
   "name": "@amoy/physify",
   "moduleName": "physify",
-  "version": "0.1.4",
+  "version": "0.1.7",
   "description": "physics engine for amoy.js.",
   "main": "dist/physify.js",
   "module": "dist/physify.es.js",

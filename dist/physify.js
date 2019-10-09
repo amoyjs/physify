@@ -10399,60 +10399,66 @@
     var matter_2 = matter.Bodies;
     var matter_3 = matter.World;
 
-    function physify(_a) {
-        var Sprite = _a.Sprite, Text = _a.Text, Graphics = _a.Graphics, Container = _a.Container;
+    function physify(options) {
+        if (options === void 0) { options = {}; }
+        var _a = options.gravity, gravity = _a === void 0 ? { x: 0, y: .98 } : _a;
         var things = [];
         var engine = matter_1.create();
+        engine.world.gravity = gravity;
         matter_1.run(engine);
-        var components = [Sprite, Text, Graphics, Container];
-        components.map(function (component) {
-            component.prototype.physify = function physify(options) {
-                var _this = this;
-                if ([Sprite, Text].includes(component)) {
-                    this.anchor.set(.5);
-                    this.x += this.width / 2;
-                    this.y += this.height / 2;
-                }
-                if ([Graphics].includes(component)) {
-                    this.x += this.width / 2;
-                    this.y += this.height / 2;
-                }
-                var _a = options.shape, shape = _a === void 0 ? 'rect' : _a, rest = __rest(options, ["shape"]);
-                var createBody = function (shape) {
-                    if (shape === 'circle') {
-                        return matter_2.circle(_this.x, _this.y, _this.width / 2, rest);
+        return function (_a) {
+            var Sprite = _a.Sprite, Text = _a.Text, Graphics = _a.Graphics, Container = _a.Container;
+            var components = [Sprite, Text, Graphics, Container];
+            components.map(function (component) {
+                component.prototype.physify = function physify(options) {
+                    var _this = this;
+                    if ([Sprite, Text].includes(component)) {
+                        this.anchor.set(.5);
+                        this.x += this.width / 2;
+                        this.y += this.height / 2;
                     }
-                    else {
-                        return matter_2.rectangle(_this.x, _this.y, _this.width, _this.height, rest);
+                    if ([Graphics].includes(component)) {
+                        this.x += this.width / 2;
+                        this.y += this.height / 2;
                     }
+                    var _a = options.shape, shape = _a === void 0 ? 'rect' : _a, rest = __rest(options, ["shape"]);
+                    var createBody = function (shape) {
+                        if (shape === 'circle') {
+                            return matter_2.circle(_this.x, _this.y, _this.width / 2, rest);
+                        }
+                        else {
+                            return matter_2.rectangle(_this.x, _this.y, _this.width, _this.height, rest);
+                        }
+                    };
+                    var body = createBody(shape);
+                    if (this.parent) {
+                        matter_3.add(engine.world, [body]);
+                        things.push({
+                            body: body,
+                            sprite: this,
+                        });
+                    }
+                    return body;
                 };
-                var body = createBody(shape);
-                if (this.parent) {
-                    matter_3.add(engine.world, [body]);
-                    things.push({
-                        body: body,
-                        sprite: this,
-                    });
-                }
-            };
-        });
-        pixi_js.Ticker.shared.add(function () {
-            things.map(function (_a) {
-                var body = _a.body, sprite = _a.sprite;
-                if (body.render.visible) {
-                    var _b = body.position, x = _b.x, y = _b.y, angle = body.angle;
-                    sprite.rotation = angle;
-                    if (!sprite.anchor) {
-                        sprite.x = x - sprite.width / 2;
-                        sprite.y = y - sprite.height / 2;
-                    }
-                    else {
-                        sprite.x = x;
-                        sprite.y = y;
-                    }
-                }
             });
-        });
+            pixi_js.Ticker.shared.add(function () {
+                things.map(function (_a) {
+                    var body = _a.body, sprite = _a.sprite;
+                    if (body.render.visible) {
+                        var _b = body.position, x = _b.x, y = _b.y, angle = body.angle;
+                        sprite.rotation = angle;
+                        if (!sprite.anchor) {
+                            sprite.x = x - sprite.width / 2;
+                            sprite.y = y - sprite.height / 2;
+                        }
+                        else {
+                            sprite.x = x;
+                            sprite.y = y;
+                        }
+                    }
+                });
+            });
+        };
     }
 
     return physify;
