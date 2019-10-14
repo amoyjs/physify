@@ -1,4 +1,4 @@
-import { Ticker } from 'pixi.js';
+import { Ticker, Sprite, Graphics, Container } from 'pixi.js';
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -10391,20 +10391,69 @@ var Vector = _dereq_('../geometry/Vector');
 },{"../body/Composite":2,"../core/Common":14,"../core/Events":16,"../geometry/Bounds":26,"../geometry/Vector":28}]},{},[30])(30)
 });
 });
-var matter_1 = matter.Engine;
-var matter_2 = matter.Bodies;
-var matter_3 = matter.World;
-var matter_4 = matter.Render;
+var matter_1 = matter.World;
+var matter_2 = matter.Body;
+var matter_3 = matter.Bodies;
+var matter_4 = matter.Engine;
+var matter_5 = matter.Render;
+var matter_6 = matter.Constraint;
 
 var things = [];
-var engine = matter_1.create();
+var engine = matter_4.create();
+function setGravity(_a) {
+    var x = _a.x, y = _a.y;
+    engine.world.gravity.x = x || 0;
+    engine.world.gravity.y = y || 0;
+}
+function createUI(body, image) {
+    var _a = body.position, x = _a.x, y = _a.y, circleRadius = body.circleRadius, label = body.label;
+    var isCircle = label === 'Circle Body';
+    var ui = image && typeof image === 'string' ? Sprite.from(image) : createGraphics(x, y, circleRadius * 2, circleRadius * 2, isCircle ? circleRadius : 0);
+    if (ui.pivot) {
+        ui.pivot.x = ui.width / 2;
+        ui.pivot.y = ui.height / 2;
+    }
+    things.push({
+        body: body,
+        sprite: ui,
+    });
+    return ui;
+}
+function createGraphics(x, y, width, height, radius, color) {
+    if (radius === void 0) { radius = 0; }
+    if (color === void 0) { color = 0xffffff; }
+    var graphic = new Graphics();
+    graphic.beginFill(color);
+    graphic.drawRoundedRect(0, 0, width, height, radius);
+    graphic.endFill();
+    graphic.x = x;
+    graphic.y = y;
+    return graphic;
+}
+var netContainer = new Container();
+function renderCloth(cloth) {
+    netContainer.removeChildren();
+    var lines = cloth.constraints.map(function (constraint) {
+        var positionA = constraint.bodyA.position, positionB = constraint.bodyB.position;
+        return drawLine(positionA, positionB);
+    });
+    netContainer.addChild.apply(netContainer, lines);
+    return netContainer;
+}
+function drawLine(pointA, pointB) {
+    var line = new Graphics();
+    line.lineStyle(1, 0xffffff, 1);
+    line.moveTo(pointA.x, pointA.y);
+    line.lineTo(pointB.x, pointB.y);
+    return line;
+}
 function physify(options) {
     if (options === void 0) { options = {}; }
     var _a = options.gravity, gravity = _a === void 0 ? { x: 0, y: .98 } : _a, _b = options.renderer, renderer = _b === void 0 ? false : _b;
-    engine.world.gravity = Object.assign(engine.world.gravity, gravity);
-    matter_1.run(engine);
+    setGravity(gravity);
+    matter_4.run(engine);
     if (renderer) {
-        matter_4.run(matter_4.create({
+        matter_5.run(matter_5.create({
             element: document.body,
             engine: engine,
             options: {
@@ -10444,26 +10493,63 @@ function physify(options) {
                 var _a = options.shape, shape = _a === void 0 ? 'rect' : _a, rest = __rest(options, ["shape"]);
                 var createBody = function (shape) {
                     if (shape === 'circle') {
-                        return matter_2.circle(_this.x, _this.y, _this.width / 2, rest);
+                        return matter_3.circle(_this.x, _this.y, _this.width / 2, rest);
                     }
                     else {
-                        return matter_2.rectangle(_this.x, _this.y, _this.width, _this.height, rest);
+                        return matter_3.rectangle(_this.x, _this.y, _this.width, _this.height, rest);
                     }
                 };
-                var body = createBody(shape);
+                this.body = createBody(shape);
                 if (this.parent) {
-                    matter_3.add(engine.world, [body]);
+                    matter_1.add(engine.world, [this.body]);
                     things.push({
-                        body: body,
+                        body: this.body,
                         sprite: this,
                     });
                 }
-                return body;
+                return this.body;
+            };
+            component.prototype.bodySet = function bodySet(settings, value) {
+                matter_2.set(this.body, settings, value);
+            };
+            component.prototype.setForce = function force(position, force) {
+                if (position === void 0) { position = [0, 0]; }
+                if (force === void 0) { force = [0, 0]; }
+                matter_2.applyForce(this.body, {
+                    x: position[0],
+                    y: position[1],
+                }, {
+                    x: force[0],
+                    y: force[1],
+                });
+            };
+            component.prototype.setVelocity = function velocity(velocity) {
+                if (velocity === void 0) { velocity = [0, 0]; }
+                matter_2.setVelocity(this.body, {
+                    x: velocity[0],
+                    y: velocity[1],
+                });
+            };
+            component.prototype.constraint = function constraint(_a) {
+                var _b = _a.pointSelf, pointSelf = _b === void 0 ? [0, 0] : _b, _c = _a.pointTarget, pointTarget = _c === void 0 ? [0, 0] : _c;
+                matter_1.add(engine.world, [
+                    matter_6.create({
+                        bodyA: this.body,
+                        pointA: {
+                            x: pointSelf[0],
+                            y: pointSelf[1],
+                        },
+                        pointB: {
+                            x: pointTarget[0],
+                            y: pointTarget[1],
+                        },
+                    }),
+                ]);
             };
         });
     };
 }
 
 export default physify;
-export { matter_2 as Bodies, matter_1 as Engine, matter_4 as Render, matter_3 as World, matter as __moduleExports, engine, things };
+export { matter_3 as Bodies, matter_2 as Body, matter_6 as Constraint, matter_4 as Engine, matter_5 as Render, matter_1 as World, matter as __moduleExports, createUI, engine, renderCloth, setGravity, things };
 //# sourceMappingURL=physify.es.js.map

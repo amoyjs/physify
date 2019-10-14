@@ -34,7 +34,7 @@ const configure = {
         typescript(),
         commonjs({
             namedExports: {
-                'matter-js': ['Engine', 'Bodies', 'World', 'Render'],
+                'matter-js': ['World', 'Body', 'Bodies', 'Engine', 'Render', 'Constraint'],
             },
         }),
         resolve(),
